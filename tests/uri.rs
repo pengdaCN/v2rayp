@@ -15,7 +15,20 @@ fn decode() {
 fn query() {
     use v2rayp::common::UriQueries;
 
-    let query = "%E4%B8%AD".parse::<UriQueries>().unwrap();
+    let query = "q=%E4%B8%AD".parse::<UriQueries>().unwrap();
 
     println!("{:?}", query.get("q").unwrap())
+}
+
+#[test]
+fn url_build() {
+    use v2rayp::common::UriQueries;
+
+    let mut query = UriQueries::new();
+
+    query.append("xx", String::from("111"));
+    query.append("xx", String::from("1211"));
+    query.append("xx", String::from("1311"));
+
+    println!("{query}")
 }
