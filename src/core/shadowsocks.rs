@@ -12,23 +12,19 @@ pub struct Shadowsocks {
 impl Shadowsocks {
     pub fn from_ss_url(link: &str) -> Result<Self> {
         fn parse(s: &str) -> Option<Shadowsocks> {
+            use base64::{engine::general_purpose, Engine as _};
             use http::uri::Uri;
-            use base64::{Engine as _, engine::general_purpose};
 
             let link = s.parse::<Uri>().ok()?;
             let auth = link.authority()?;
             let username = auth.as_str().split('@').next()?;
-            let username = String::from_utf8(
-                general_purpose::URL_SAFE.decode(username).ok()?
-            ).ok()?;
+            let username =
+                String::from_utf8(general_purpose::URL_SAFE.decode(username).ok()?).ok()?;
 
             let mut username = username.split(':');
 
             let cipher = username.next()?;
             let password = username.next()?;
-
-
-
 
             unimplemented!()
         }
