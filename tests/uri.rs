@@ -5,7 +5,10 @@ fn decode() {
     let url = "https://lib.rs/search?q=%E4%B8%AD".parse::<Uri>().unwrap();
 
     println!("{}", url.query().expect("1111"));
-    println!("{}", urlencoding::decode(url.query().expect("222")).expect("333"));
+    println!(
+        "{}",
+        urlencoding::decode(url.query().expect("222")).expect("333")
+    );
 }
 
 #[test]

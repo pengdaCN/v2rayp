@@ -1,7 +1,8 @@
 use anyhow::bail;
 use std::collections::HashMap;
+use std::fmt::{Display, Formatter};
 use std::str::FromStr;
-use urlencoding::decode;
+use urlencoding::{decode, encode};
 
 pub struct UriQueries {
     values: HashMap<String, uri_query::Value>,
@@ -27,6 +28,39 @@ mod uri_query {
 impl UriQueries {
     pub fn get(&self, key: &str) -> Option<&Vec<String>> {
         self.values.get(key).map(|v| &v.data)
+    }
+
+    pub fn append(&mut self, key: &str, value: String) {
+        let vals = if let Some(vals) = self.values.get_mut(key) {
+            vals
+        } else {
+            self.values
+                .insert(String::from(key), uri_query::Value::new(self.seq));
+            self.seq += 1;
+
+            self.values.get_mut(key).unwrap()
+        };
+
+        vals.data.push(value)
+    }
+}
+
+impl Display for UriQueries {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let mut items: Vec<_> = self.values.iter().collect();
+        items.sort_by(|a, b| a.1.score.cmp(&b.1.score));
+
+        let kvs: Vec<_> = items
+            .into_iter()
+            .flat_map(|x| {
+                x.1.data
+                    .iter()
+                    .map(|v| format!("{key}={val}", key = encode(x.0), val = encode(v)))
+                    .collect::<Vec<_>>()
+            })
+            .collect();
+
+        write!(f, "{}", kvs.join("&"))
     }
 }
 
