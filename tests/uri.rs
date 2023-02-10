@@ -4,13 +4,15 @@ fn decode() {
 
     let url = "https://lib.rs/search?q=%E4%B8%AD".parse::<Uri>().unwrap();
 
-    println!("{}", url.query().unwrap());
-    println!("{}", urlencoding::decode(url.query().unwrap()).unwrap());
+    println!("{}", url.query().expect("1111"));
+    println!("{}", urlencoding::decode(url.query().expect("222")).expect("333"));
 }
 
 #[test]
-fn url_query() {
+fn query() {
     use v2rayp::common::UriQueries;
 
-    let _ = "q=%E4%B8%AD".parse::<UriQueries>().unwrap();
+    let query = "%E4%B8%AD".parse::<UriQueries>().unwrap();
+
+    println!("{:?}", query.get("q").unwrap())
 }
