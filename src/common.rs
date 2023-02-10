@@ -43,6 +43,31 @@ impl UriQueries {
 
         vals.data.push(value)
     }
+
+    pub fn put(&mut self, key: &str, value: String) -> Option<Vec<String>> {
+        let data = self.values.remove(key);
+
+        let seq = if let Some(old) = &data {
+            old.score
+        } else {
+            let seq = self.seq;
+
+            self.seq += 1;
+
+            seq
+        };
+
+        let mut vals = uri_query::Value::new(seq);
+        vals.data.push(value);
+
+        self.values.insert(String::from(key), vals);
+
+        data.map(|x| x.data)
+    }
+
+    pub fn del(&mut self, key: &str) -> Option<Vec<String>> {
+        self.values.remove(key).map(|v| v.data)
+    }
 }
 
 impl Display for UriQueries {
