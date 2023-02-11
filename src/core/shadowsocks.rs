@@ -1,5 +1,6 @@
 use crate::common::UriQueries;
 use anyhow::{Context, Result};
+use base64::{engine::general_purpose, Engine as _};
 
 pub struct Shadowsocks {
     name: Option<String>,
@@ -13,7 +14,6 @@ pub struct Shadowsocks {
 impl Shadowsocks {
     pub fn from_ss_url(link: &str) -> Result<Self> {
         fn parse(s: &str) -> Option<Shadowsocks> {
-            use base64::{engine::general_purpose, Engine as _};
             use http::uri::Uri;
 
             let link = s.parse::<Uri>().ok()?;
@@ -48,7 +48,26 @@ impl Shadowsocks {
             })
         }
 
-        unimplemented!()
+        parse(link)
+            .or_else(|| {
+                let (_, link) = link.split_at(5);
+
+                let parts: Vec<_> = link.splitn(2, '#').collect();
+                let first = parts.first().unwrap();
+                let l = general_purpose::STANDARD
+                    .decode(first)
+                    .ok()
+                    .or_else(|| general_purpose::URL_SAFE.decode(first).ok())
+                    .map(|x| String::from_utf8(x).ok())??;
+
+                let mut l = vec![String::from("s://"), l].concat();
+                if let Some(x) = parts.get(1) {
+                    l = vec![l, String::from(*x)].join("#");
+                }
+
+                parse(&l)
+            })
+            .context("invalid parameters unrecognized ss address")
     }
 }
 
