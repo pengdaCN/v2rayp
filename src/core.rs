@@ -8,7 +8,7 @@ pub trait ServiceObject {
     fn get_port(&self) -> i32;
     fn get_hostname(&self) -> &str;
     fn get_protocol(&self) -> &str;
-    fn proto_to_show(&self) -> &str;
+    fn proto_to_show(&self) -> String;
     fn need_plugin_port(&self) -> bool;
     fn configuration(&self);
 }

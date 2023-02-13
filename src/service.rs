@@ -36,3 +36,7 @@ pub fn import(url: &str) -> Result<Vec<Box<dyn ServiceObject>>> {
 }
 
 fn resolve_lines(s: &str) {}
+
+fn resolve_sip008(s: &str) -> Result<Box<dyn ServiceObject>> {
+    unimplemented!()
+}

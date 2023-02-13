@@ -1,4 +1,5 @@
 use crate::common::UriQueries;
+use crate::core::ServiceObject;
 use anyhow::{Context, Result};
 use base64::{engine::general_purpose, Engine as _};
 
@@ -11,7 +12,56 @@ pub struct Shadowsocks {
     plugin: Option<Sip003>,
 }
 
+impl ServiceObject for Shadowsocks {
+    fn set_name(&mut self, name: &str) {
+        self.name.replace(String::from(name));
+    }
+
+    fn get_name(&self) -> &str {
+        if let Some(name) = self.name.as_ref() {
+            name
+        } else {
+            ""
+        }
+    }
+
+    fn get_port(&self) -> i32 {
+        self.port
+    }
+
+    fn get_hostname(&self) -> &str {
+        &self.server
+    }
+
+    fn get_protocol(&self) -> &str {
+        Shadowsocks::PROTOCOL
+    }
+
+    fn proto_to_show(&self) -> String {
+        let ciph = match self.cipher.as_str() {
+            "chacha20-ietf-poly1305" | "chacha20-poly1305" => "c20p1305",
+            _ => self.cipher.as_str(),
+        };
+
+        if let Some(plugin_name) = self.plugin.as_ref().map(|v| v.name.as_str()) {
+            format!("SS({ciph}-{plugin_name})")
+        } else {
+            format!("SS({ciph})")
+        }
+    }
+
+    fn need_plugin_port(&self) -> bool {
+        self.plugin.is_some()
+    }
+
+    fn configuration(&self) {
+        todo!()
+    }
+}
+
 impl Shadowsocks {
+    const PROTOCOL: &'static str = "shadowsocks";
+
     pub fn from_ss_url(link: &str) -> Result<Self> {
         fn parse(s: &str) -> Option<Shadowsocks> {
             use http::uri::Uri;
